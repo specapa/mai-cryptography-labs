@@ -1,0 +1,7 @@
+*.exe
+*.test
+testdata/out/
+testdata/*.wav
+testdata/*.ppm
+testdata/*.y4m
+testdata/rbtree_allocator_test.go
