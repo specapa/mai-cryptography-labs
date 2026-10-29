@@ -16,6 +16,7 @@ func gcdCases() []gcdCase {
 
 	return []gcdCase{
 		{name: "Простые взаимно простые числа", a: big.NewInt(67), b: big.NewInt(52)},
+		{name: "Одно и то же простое число", a: big.NewInt(67), b: big.NewInt(67)},
 		{name: "Обычные числа с общим делителем", a: big.NewInt(48), b: big.NewInt(18)},
 		{name: "Одно из чисел ноль (первое)", a: big.NewInt(0), b: big.NewInt(45)},
 		{name: "Одно из чисел ноль (второе)", a: big.NewInt(45), b: big.NewInt(0)},
@@ -25,6 +26,7 @@ func gcdCases() []gcdCase {
 		{name: "Оба числа отрицательные", a: big.NewInt(-48), b: big.NewInt(-18)},
 		{name: "Одно число сильно больше другого", a: big.NewInt(1000000000), b: big.NewInt(2)},
 		{name: "Большие многозначные числа", a: bigA, b: bigB},
+		{name: "Сбой на чётном остатке", a: big.NewInt(84), b: big.NewInt(18)},
 	}
 }
 
@@ -63,6 +65,21 @@ func TestEGCD_TableDriven(t *testing.T) {
 			combo.Add(combo, new(big.Int).Mul(tc.b, y))
 			if combo.Cmp(expected) != 0 {
 				t.Errorf("EGCD(%s, %s): %s*%s + %s*%s = %s, want %s", tc.a, tc.b, tc.a, x, tc.b, y, combo, expected)
+			}
+		})
+	}
+}
+
+func TestBGCD_TableDriven(t *testing.T) {
+	svc := NewService()
+
+	for _, tc := range gcdCases() {
+		t.Run(tc.name, func(t *testing.T) {
+			expected := referenceGCD(tc.a, tc.b)
+			actual := svc.BinaryGCD(tc.a, tc.b)
+
+			if actual.Cmp(expected) != 0 {
+				t.Errorf("GCD(%s, %s): expected %s, got %s", tc.a, tc.b, expected, actual)
 			}
 		})
 	}

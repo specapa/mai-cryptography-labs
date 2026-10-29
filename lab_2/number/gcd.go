@@ -55,6 +55,42 @@ func (s *Service) EGCD(a, b *big.Int) (g, x, y *big.Int) {
 	return rem0, x0, y0
 }
 
+func isEven(a *big.Int) bool {
+	return a.Bit(0) == 0
+}
+
 func (s *Service) BinaryGCD(a, b *big.Int) *big.Int {
-	panic("not implemented")
+	x := new(big.Int).Abs(a)
+	y := new(big.Int).Abs(b)
+	k := uint(0)
+
+	for {
+		if x == y {
+			return x.Lsh(x, k)
+		} else if x.Sign() == 0 {
+			return y.Lsh(y, k)
+		} else if y.Sign() == 0 {
+			return x.Lsh(x, k)
+		}
+
+		for isEven(x) && isEven(y) {
+			k++
+			x.Rsh(x, 1)
+			y.Rsh(y, 1)
+		}
+
+		for isEven(x) {
+			x.Rsh(x, 1)
+		}
+
+		for isEven(y) {
+			y.Rsh(y, 1)
+		}
+
+		if x.Cmp(y) > 0 {
+			x.Sub(x, y)
+		} else {
+			y.Sub(y, x)
+		}
+	}
 }
