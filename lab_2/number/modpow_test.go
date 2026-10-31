@@ -44,6 +44,11 @@ func modPowCases() []modPowCase {
 			want: big.NewInt(0),
 		},
 		{
+			name: "Отрицательное основание",
+			base: big.NewInt(-123), exp: big.NewInt(456), mod: big.NewInt(1),
+			want: big.NewInt(0),
+		},
+		{
 			name: "Большие числа",
 			base: bigBase, exp: bigExp, mod: bigMod,
 			want: new(big.Int).Exp(bigBase, bigExp, bigMod),
@@ -51,16 +56,18 @@ func modPowCases() []modPowCase {
 	}
 }
 
-func TestModPow_TableDriven(t *testing.T) {
-	svc := NewService()
-
+func testModPow_TableDriven(t *testing.T, ModPow func(*big.Int, *big.Int, *big.Int) (*big.Int, error)) {
+	t.Helper()
 	for _, tc := range modPowCases() {
 		t.Run(tc.name, func(t *testing.T) {
 			base := new(big.Int).Set(tc.base)
 			exp := new(big.Int).Set(tc.exp)
 			mod := new(big.Int).Set(tc.mod)
 
-			got := svc.ModPow(base, exp, mod)
+			got, err := ModPow(base, exp, mod)
+			if err != nil {
+				t.Fatal("ModPow returned error")
+			}
 			if got == nil {
 				t.Fatal("ModPow() returned nil")
 			}
@@ -78,18 +85,26 @@ func TestModPow_TableDriven(t *testing.T) {
 	}
 }
 
-func TestModPow_PanicsForNonPositiveModulus(t *testing.T) {
-	svc := NewService()
-
+func testModPow_InvalidModulus(t *testing.T, ModPow func(*big.Int, *big.Int, *big.Int) (*big.Int, error)) {
+	t.Helper()
 	for _, mod := range []*big.Int{big.NewInt(0), big.NewInt(-7)} {
 		t.Run(mod.String(), func(t *testing.T) {
-			defer func() {
-				if recover() == nil {
-					t.Errorf("ModPow() did not panic for modulus %s", mod)
-				}
-			}()
-
-			svc.ModPow(big.NewInt(2), big.NewInt(3), mod)
+			_, err := ModPow(big.NewInt(2), big.NewInt(3), mod)
+			if err != ErrInvalidModules {
+				t.Errorf("ModPow() should return ErrInvalidModules for modulus %s", mod)
+			}
 		})
 	}
+}
+
+func TestModPowRL(t *testing.T) {
+	svc := NewService()
+	testModPow_TableDriven(t, svc.ModPowRL)
+	testModPow_InvalidModulus(t, svc.ModPowRL)
+}
+
+func TestModPowLR(t *testing.T) {
+	svc := NewService()
+	testModPow_TableDriven(t, svc.ModPowLR)
+	testModPow_InvalidModulus(t, svc.ModPowLR)
 }
