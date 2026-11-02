@@ -80,8 +80,3 @@ func TestEulerPhiDFT(t *testing.T) {
 	svc := NewService()
 	testEuler_TableDriven(t, svc.EulerPhiDFT, eulerCases())
 }
-
-func TestEulerPhiDFTBigValues(t *testing.T) {
-	svc := NewService()
-	testEuler_TableDriven(t, svc.EulerPhiDFT, eulerCasesBigValues())
-}

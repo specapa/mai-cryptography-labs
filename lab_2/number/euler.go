@@ -2,6 +2,7 @@ package number
 
 import (
 	"errors"
+	"math"
 	"math/big"
 )
 
@@ -93,5 +94,31 @@ func (s *Service) EulerPhiDFT(n *big.Int) (*big.Int, error) {
 	if !eulerValidateData(n) {
 		return nil, ErrInvalidInput
 	}
-	panic("Undefined")
+
+	one := new(big.Int)
+	one.SetInt64(1)
+
+	if n.Cmp(one) == 0 {
+		return one, nil
+	}
+
+	var sm float64
+	result := new(big.Int)
+	gcd := new(big.Int)
+
+	k := new(big.Int)
+	k.Set(one)
+
+	for k.Cmp(n) <= 0 {
+		gcd.Set(s.BinaryGCD(k, n))
+		f_float64, _ := k.Float64()
+		n_float64, _ := n.Float64()
+		g_float64, _ := gcd.Float64()
+		d := 2 * math.Pi * f_float64 / n_float64
+		sm += g_float64 * math.Cos(d)
+		s.fastIncrement(k)
+	}
+
+	result.SetInt64(int64(math.Round(sm)))
+	return result, nil
 }
