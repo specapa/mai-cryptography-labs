@@ -14,12 +14,16 @@ func eulerCasesBigValues() []eulerCase {
 	bigPrime, _ := new(big.Int).SetString("1000000000000037", 10)
 	bigPrimeMinus1, _ := new(big.Int).SetString("1000000000000036", 10)
 
-	bigComposite, _ := new(big.Int).SetString("123456789012345", 10)
-	bigCompositeValue, _ := new(big.Int).SetString("82304496112000", 10)
+	bigComposite_0, _ := new(big.Int).SetString("123456789012345", 10)
+	bigCompositeValue_0, _ := new(big.Int).SetString("65593911768000", 10)
+
+	bigComposite_1, _ := new(big.Int).SetString("67676767676767676767", 10)
+	bigCompositeValue_1, _ := new(big.Int).SetString("64131589399680000000", 10)
 
 	return []eulerCase{
 		{name: "Большое простое число", n: bigPrime, value: bigPrimeMinus1},
-		{name: "Большое составное число", n: bigComposite, value: bigCompositeValue},
+		{name: "Большое составное число 1", n: bigComposite_0, value: bigCompositeValue_0},
+		{name: "Большое составное число 2", n: bigComposite_1, value: bigCompositeValue_1},
 	}
 }
 
@@ -45,13 +49,13 @@ func testEuler_TableDriven(t *testing.T, EulerPhi func(*big.Int) (*big.Int, erro
 			got, err := EulerPhi(n)
 
 			if err != nil {
-				t.Fatal("EulerPhi return error")
+				t.Errorf("%s return error", t.Name())
 			}
 			if got == nil {
-				t.Fatal("EulerPhi return nil")
+				t.Errorf("%s return nil", t.Name())
 			}
 			if got.Cmp(tc.value) != 0 {
-				t.Errorf("EulerPhi return wrong answer! Got: %s; Expected: %s", got, tc.value)
+				t.Errorf("%s return wrong answer! Got: %s; Expected: %s", t.Name(), got, tc.value)
 			}
 		})
 	}
@@ -65,11 +69,19 @@ func TestEulerPhiDefinition(t *testing.T) {
 func TestEulerPhiFactorization(t *testing.T) {
 	svc := NewService()
 	testEuler_TableDriven(t, svc.EulerPhiFactorization, eulerCases())
+}
+
+func TestEulerPhiFactorizationBigValues(t *testing.T) {
+	svc := NewService()
 	testEuler_TableDriven(t, svc.EulerPhiFactorization, eulerCasesBigValues())
 }
 
 func TestEulerPhiDFT(t *testing.T) {
 	svc := NewService()
 	testEuler_TableDriven(t, svc.EulerPhiDFT, eulerCases())
+}
+
+func TestEulerPhiDFTBigValues(t *testing.T) {
+	svc := NewService()
 	testEuler_TableDriven(t, svc.EulerPhiDFT, eulerCasesBigValues())
 }
