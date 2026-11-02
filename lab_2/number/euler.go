@@ -41,11 +41,52 @@ func (s *Service) EulerPhiDefinition(n *big.Int) (*big.Int, error) {
 	return sm, nil
 }
 
+func (s *Service) factorizationHelper(n *big.Int, m *big.Int) {
+	// n / m * (m - 1)
+	tmp := new(big.Int)
+	tmp.Set(m)
+	n.Div(n, tmp)
+	s.fastDecrement(tmp)
+	n.Mul(n, tmp)
+}
+
 func (s *Service) EulerPhiFactorization(n *big.Int) (*big.Int, error) {
 	if !eulerValidateData(n) {
 		return nil, ErrInvalidInput
 	}
-	panic("Undefined")
+
+	one := new(big.Int)
+	one.SetInt64(1)
+
+	if n.Cmp(one) == 0 {
+		return one, nil
+	}
+
+	result := new(big.Int)
+	result.Set(n)
+
+	p := new(big.Int)
+	p.SetInt64(2)
+
+	tmp := new(big.Int)
+
+	for n.Cmp(tmp.Mul(p, p)) >= 0 {
+		tmp.Mod(n, p)
+		if tmp.Sign() == 0 {
+			for tmp.Sign() == 0 {
+				n.Div(n, p)
+				tmp.Mod(n, p)
+			}
+			s.factorizationHelper(result, p)
+		}
+		s.fastIncrement(p)
+	}
+
+	if n.Cmp(one) > 0 {
+		s.factorizationHelper(result, n)
+	}
+
+	return result, nil
 }
 
 func (s *Service) EulerPhiDFT(n *big.Int) (*big.Int, error) {
