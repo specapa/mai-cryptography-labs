@@ -21,3 +21,14 @@ func (s *Service) fastDecrement(z *big.Int) {
 		z.Sub(z, bigOne)
 	}
 }
+
+func (s *Service) fastAddUint(z *big.Int, n big.Word) {
+	if n == 0 {
+		return
+	}
+	if bits := z.Bits(); len(bits) > 0 && bits[0] <= ^big.Word(0)-n {
+		bits[0] += n
+		return
+	}
+	z.Add(z, new(big.Int).SetUint64(uint64(n)))
+}

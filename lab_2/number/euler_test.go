@@ -1,6 +1,7 @@
 package number
 
 import (
+	"errors"
 	"math/big"
 	"testing"
 )
@@ -49,13 +50,13 @@ func testEuler_TableDriven(t *testing.T, EulerPhi func(*big.Int) (*big.Int, erro
 			got, err := EulerPhi(n)
 
 			if err != nil {
-				t.Errorf("%s return error", t.Name())
+				t.Fatalf("%s return error", t.Name())
 			}
 			if got == nil {
-				t.Errorf("%s return nil", t.Name())
+				t.Fatalf("%s return nil", t.Name())
 			}
 			if got.Cmp(tc.value) != 0 {
-				t.Errorf("%s return wrong answer! Got: %s; Expected: %s", t.Name(), got, tc.value)
+				t.Fatalf("%s return wrong answer! Got: %s; Expected: %s", t.Name(), got, tc.value)
 			}
 		})
 	}
@@ -79,4 +80,54 @@ func TestEulerPhiFactorizationBigValues(t *testing.T) {
 func TestEulerPhiDFT(t *testing.T) {
 	svc := NewService()
 	testEuler_TableDriven(t, svc.EulerPhiDFT, eulerCases())
+}
+
+func TestEulerPhiInvalidInput(t *testing.T) {
+	svc := NewService()
+	methods := []struct {
+		name string
+		fn   func(*big.Int) (*big.Int, error)
+	}{
+		{name: "Definition", fn: svc.EulerPhiDefinition},
+		{name: "Factorization", fn: svc.EulerPhiFactorization},
+		{name: "DFT", fn: svc.EulerPhiDFT},
+	}
+	inputs := []struct {
+		name string
+		n    *big.Int
+	}{
+		{name: "nil", n: nil},
+		{name: "ноль", n: big.NewInt(0)},
+		{name: "отрицательное", n: big.NewInt(-15)},
+	}
+
+	for _, m := range methods {
+		for _, in := range inputs {
+			t.Run(m.name+"/"+in.name, func(t *testing.T) {
+				got, err := m.fn(in.n)
+				if !errors.Is(err, ErrInvalidInput) {
+					t.Fatalf("got error %v, expected ErrInvalidInput", err)
+				}
+				if got != nil {
+					t.Fatalf("got %v, expected nil", got)
+				}
+			})
+		}
+	}
+}
+
+func TestEulerPhiDFTRepresentation(t *testing.T) {
+	svc := NewService()
+	n, ok := new(big.Int).SetString("67676767676767676767", 10)
+	if !ok {
+		t.Fatal("failed to parse n")
+	}
+
+	got, err := svc.EulerPhiDFT(n)
+	if !errors.Is(err, ErrRepresentation) {
+		t.Fatalf("got error %v, expected ErrRepresentation", err)
+	}
+	if got != nil {
+		t.Fatalf("got %v, expected nil", got)
+	}
 }
