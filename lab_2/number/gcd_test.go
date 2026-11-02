@@ -79,7 +79,7 @@ func TestBGCD_TableDriven(t *testing.T) {
 			actual := svc.BinaryGCD(tc.a, tc.b)
 
 			if actual.Cmp(expected) != 0 {
-				t.Errorf("GCD(%s, %s): expected %s, got %s", tc.a, tc.b, expected, actual)
+				t.Errorf("BGCD(%s, %s): expected %s, got %s", tc.a, tc.b, expected, actual)
 			}
 		})
 	}
